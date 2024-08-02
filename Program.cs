@@ -1,16 +1,13 @@
 ﻿using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Shapes;
+using Avalonia.Controls.Metadata;
 using Avalonia.Interactivity;
 using Avalonia.Media;
-using Avalonia.Layout;
+using Avalonia.Styling;
 
-class MainClass {
-
-    static Canvas canvas;
-    static Label right;
-    static int x = 0;
+class MainClass
+{
     public static void Main(string[] args) {
         AppBuilder
             .Configure<Application>()
@@ -18,27 +15,55 @@ class MainClass {
             .Start(AppMain, args);
     }
 
-    public static void AppMain(Application app, string[] args) {
-        // Application needs a theme to render window content
+    public static void AppMain(Application app, string[] args)
+    {
         app.Styles.Add(new Avalonia.Themes.Simple.SimpleTheme());
         app.RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Default; // Default, Dark, Light
 
-        // Create window
         var win = new Window
         {
-            Title = "Avalonia no XAML here's hopin' 3",
+            Title = "Avalonia C# Examples",
             Width = 800,
             Height = 600,
             Background = Brushes.Orange,
         };
 
-        Grid grid = new Grid();
-        grid.ShowGridLines = true;
-        grid.Background = Brushes.SeaGreen;
-        grid.RowDefinitions = RowDefinitions.Parse("20*, 80*");
-        grid.ColumnDefinitions = ColumnDefinitions.Parse("25*, 25*, 50*");
+        Grid grid = new Grid
+        {
+            ShowGridLines = true,
+            Background = Brushes.SeaGreen,
+            RowDefinitions = RowDefinitions.Parse("*, *, *, *"),
+            ColumnDefinitions = ColumnDefinitions.Parse("*, *, *, *")
+        };
 
-        Button clearButton = new Button {Content = "Clear", FontSize = 48};
+        AddButton(grid, "VStack", 0, 0, (s, e) => new VStackPanelWindow());
+        AddButton(grid, "HStack", 0, 1, (s, e) => new HStackPanelWindow());
+        AddButton(grid, "Sliders &\nProgress", 0, 2, (s, e) => new SlidersProgressWindow());
+
+        win.Content = grid;
+        win.Show();
+        app.Run(win);
+    }
+
+    static void AddButton(Grid grid, string label, int row, int column, System.EventHandler<RoutedEventArgs> method)
+    {
+        Button button = new Button
+        {
+            Content = label,
+            FontSize = 24,
+            Margin = Thickness.Parse("10"),
+        };
+
+        button.SetValue(Grid.RowProperty, row);
+        button.SetValue(Grid.ColumnProperty, column);
+
+        button.Click += method;
+        grid.Children.Add(button);
+    }
+}
+
+#if false
+        clearButton = new Button {Content = "Clear", FontSize = 48};
         clearButton.Click += ClearClicked;
         Grid.SetColumn(clearButton, 0);
         grid.Children.Add(clearButton);
@@ -68,10 +93,23 @@ class MainClass {
 
         win.Content = grid;
         win.Show();
+
+        var btnStackPanel = new Button
+        {
+            Content = "Stack",
+            Margin = Thickness.Parse("16"),
+            FontSize = 24,
+        };
+        
+        btnStackPanel.SetValue(Grid.RowProperty, 2);
+        btnStackPanel.ClickMode = ClickMode.Press;
+        btnStackPanel.Click += (s, e) => new StackPanelWindow();
+
+        grid.Children.Add(btnStackPanel);
+
         app.Run(win);
     }
 
-#if false	
         win.Content = new Line {StartPoint=new Point(219.5,185.5), EndPoint=new Point(217.5,115.5), StrokeThickness=1, Stroke=new SolidColorBrush(0xFF000000)};
 
         // or
@@ -85,23 +123,3 @@ class MainClass {
         text.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center;
         text.FontSize = 72;
 #endif
-
-	public static void ButtonClicked(object sender, RoutedEventArgs args)
-	{
-		canvas.Children.Add(new Line {StartPoint=new Point(x, 200), EndPoint=new Point(100, 100), StrokeThickness=1, Stroke=new SolidColorBrush(0xFF000000)});
-        x = x + 10;
-	}
-
-    public static void ClearClicked(object sender, RoutedEventArgs args)
-    {
-        canvas.Children.Clear();
-        x = 0;
-    }
-
-    public static void PointerMoved(object sender, RoutedEventArgs args)
-    {
-        Slider slider = sender as Slider;
-
-        right.Content = $"{slider.Value}";
-    }
-}
