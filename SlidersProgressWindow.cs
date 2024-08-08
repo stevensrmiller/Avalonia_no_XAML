@@ -1,19 +1,24 @@
+using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Media.Fonts;
+using Avalonia.Styling;
 
 internal class SlidersProgressWindow
 {
     ProgressBar progBarH;
     ProgressBar progBarV;
-
+    Label labelH;
+    Label labelV;
     public SlidersProgressWindow()
     {
         var win = new Window
         {
-            Title = "SlidersProgressWindow v2.0",
+            Title = "SlidersProgressWindow v3.0",
             Height = 360,
             Width = 640,
         };
@@ -38,6 +43,15 @@ internal class SlidersProgressWindow
         sliderH.SetValue(Grid.RowProperty, 2);
         sliderH.SetValue(Grid.ColumnProperty, 0);
         sliderH.PointerMoved += SliderHMoved;
+        
+        // sliderH.Styles.Add(
+        //                 new Style(x => x.OfType<Slider>().Class(":horizontal"))
+        //                 {
+        //                         Setters =
+        //                         {
+        //                                 new Setter(Slider.HeightProperty, 150.0),
+        //                         }
+        //                 });
 
         grid.Children.Add(sliderH);
 
@@ -70,6 +84,7 @@ internal class SlidersProgressWindow
 
         progBarH.SetValue(Grid.RowProperty, 1);
         progBarH.SetValue(Grid.ColumnProperty, 0);
+        //progBarH.SetValue(Grid.ColumnSpanProperty, 2);
         
         grid.Children.Add(progBarH);
 
@@ -81,14 +96,43 @@ internal class SlidersProgressWindow
             Width = 20,
             Margin = Thickness.Parse("10"),
             HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Stretch,
             Orientation = Orientation.Vertical,
         };
 
-        progBarV.SetValue(Grid.RowProperty, 0);
-        progBarV.SetValue(Grid.ColumnProperty, 1);
-        progBarV.SetValue(Grid.RowSpanProperty, 3);
-        
         grid.Children.Add(progBarV);
+
+        progBarV.SetValue(Grid.RowProperty, 0);
+        progBarV.SetValue(Grid.RowSpanProperty, 3);
+        progBarV.SetValue(Grid.ColumnProperty, 1);
+        
+        labelH = new Label
+        {
+            VerticalAlignment = VerticalAlignment.Bottom,
+            FontSize = 24,
+            FontFamily = "Liberation Mono",
+            FontWeight = FontWeight.Bold,
+            Width = 200,
+        };
+
+        labelH.SetValue(Grid.RowProperty, 0);
+        labelH.SetValue(Grid.ColumnProperty, 0);
+
+        grid.Children.Add(labelH);
+
+        labelV = new Label
+        {
+            VerticalAlignment = VerticalAlignment.Top,
+            FontSize = 24,
+            FontFamily = "Stencil",
+            FontWeight = FontWeight.Bold,
+            Width = 200,
+        };
+
+        labelV.SetValue(Grid.RowProperty, 0);
+        labelV.SetValue(Grid.ColumnProperty, 0);
+
+        grid.Children.Add(labelV);
 
         win.Content = grid;
         win.Show();
@@ -98,10 +142,13 @@ internal class SlidersProgressWindow
     {
         Slider slider = s as Slider;
         progBarH.Value = slider.Value;
+        labelH.Content = $"H = {slider.Value,8:0.00}";
     }
 
     void SliderVMoved(object s, RoutedEventArgs e)
     {
         Slider slider = s as Slider;
         progBarV.Value = slider.Value;
-    }}
+        labelV.Content = $"V = {slider.Value,8:0.00}";
+    }
+}

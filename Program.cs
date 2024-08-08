@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
 
@@ -17,8 +18,9 @@ class MainClass
 
     public static void AppMain(Application app, string[] args)
     {
-        app.Styles.Add(new Avalonia.Themes.Simple.SimpleTheme());
-        app.RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Default; // Default, Dark, Light
+        //app.Styles.Add(new Avalonia.Themes.Simple.SimpleTheme());
+        app.Styles.Add(new Avalonia.Themes.Fluent.FluentTheme());
+        app.RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Light; // Default, Dark, Light
 
         var win = new Window
         {
@@ -36,28 +38,102 @@ class MainClass
             ColumnDefinitions = ColumnDefinitions.Parse("*, *, *, *")
         };
 
-        AddButton(grid, "VStack", 0, 0, (s, e) => new VStackPanelWindow());
-        AddButton(grid, "HStack", 0, 1, (s, e) => new HStackPanelWindow());
-        AddButton(grid, "Sliders &\nProgress", 0, 2, (s, e) => new SlidersProgressWindow());
+        AddButton(grid, "VStack", 0, 0, (s, e) => new VStackPanelWindow(),
+            "Three controls stacked up\nvertically in a window.");
+
+        AddButton(grid, "HStack", 0, 1, (s, e) => new HStackPanelWindow(),
+            "Three controls lined up\nhorizontally in a window.");
+
+        AddButton(grid, "Sliders &\nProgress", 0, 2, (s, e) => new SlidersProgressWindow(),
+            "Some sliders linked to\nsome progress bars,\nwith numeric displays.");
+
+        AddButton(grid, "Image", 0, 3, (s, e) => new ImageWindow(),
+            "Display a bitmap image.");
+
+        AddButton(grid, "Image\nProcessor", 1, 0, (s, e) => new ImageProcessWindow(),
+            "Display a bitmap image\nand invert it.");
+
+        AddButton(grid, "TextBox", 1, 1, (s, e) => new TextBoxWindow(),
+            "Show an input text box\nand read its text.");
+
+        AddButton(grid, "Dock &\nMenu", 1, 2, (s, e) => new MenuWindow(),
+            "Five-part docking window\nand traditional menu.");
+
+        AddButton(grid, "Canvas &\nLines", 1, 3, (s, e) => new CanvasWindow(),
+            "Some line drawing.");
+
+        AddButton(grid, "Canvas &\nUpdate", 2, 0, (s, e) => new CanvasUpdateWindow(),
+            "Some lines that move.");
+
+        AddButton(grid, "Canvas &\nShapes", 2, 1, (s, e) => new ShapesWindow(),
+            "Some random shapes.");
+
+        AddButton(grid, "Harmono\nGraph", 2, 2, (s, e) => new HarmonographWindow(),
+            "Draw a damped Lissajous figure.");
+
+        AddButton(grid, "Norton\nStarrs", 2, 3, (s, e) => new StarrWindow(),
+            "A shape no mechanical system can draw.");
 
         win.Content = grid;
         win.Show();
         app.Run(win);
     }
 
-    static void AddButton(Grid grid, string label, int row, int column, System.EventHandler<RoutedEventArgs> method)
+    static void AddButton(Grid grid, string label, int row, int column, System.EventHandler<RoutedEventArgs> method, string tip)
     {
         Button button = new Button
         {
+            VerticalAlignment = VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalContentAlignment = VerticalAlignment.Center,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
             Content = label,
-            FontSize = 24,
+            // Height = 120,
+            // Width = 160,
             Margin = Thickness.Parse("10"),
+            FontSize = 24,
+            Background = Brushes.LightGray,
         };
+
+        button.SetValue(ToolTip.TipProperty, tip);
+
+        button.Styles.Add(
+            new Style(x => x.OfType<Button>().Class(":pointerover").Template().Name("PART_ContentPresenter")) 
+            {
+                Setters = 
+                {
+                    new Setter(Button.BackgroundProperty, Brushes.White),
+                    //new Setter(Button.ForegroundProperty, Brushes.Yellow),
+                }
+            });
+
+        button.Styles.Add(
+            new Style(x => x.OfType<Button>().Class(":pressed").Template().Name("PART_ContentPresenter"))
+            {
+                Setters = 
+                {
+                    new Setter(Button.BackgroundProperty, Brushes.Gray),
+                    //new Setter(Button.ForegroundProperty, Brushes.Red),
+                }
+            });
+
+        button.Click += method;
+
+        // Viewbox viewbox = new Viewbox
+        // {
+        //     Child = button,
+        //     Stretch = Stretch.Fill,
+        //     Margin = Thickness.Parse("10"),
+        // };
+
+        // viewbox.SetValue(Grid.RowProperty, row);
+        // viewbox.SetValue(Grid.ColumnProperty, column);
+        
+        // grid.Children.Add(viewbox);
 
         button.SetValue(Grid.RowProperty, row);
         button.SetValue(Grid.ColumnProperty, column);
-
-        button.Click += method;
+        
         grid.Children.Add(button);
     }
 }
